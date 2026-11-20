@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{8c62f059-75e2-43ae-a704-3cb5f7b1133a}</ProjectGuid>
-    <RootNamespace>csvcgeck</RootNamespace>
+    <ProjectGuid>{0127ac61-0b63-4790-a8bd-09969d44fdd1}</ProjectGuid>
+    <RootNamespace>csvcheck</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -123,7 +123,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="csvcgeck.cpp" />
+    <ClCompile Include="csvcheck.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

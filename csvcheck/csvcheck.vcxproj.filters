@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="csvcgeck.cpp">
+    <ClCompile Include="csvcheck.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
