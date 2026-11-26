@@ -5,6 +5,20 @@
 #include <fstream>
 #include <string>
 
+// Counts how many columns a CSV line has (number of commas + 1)
+int CountColumns(const std::string& line)
+{
+    int columns = 1;
+    for (char c : line)
+    {
+        if (c == ',')
+        {
+            ++columns;
+        }
+    }
+    return columns;
+}
+
 int main(int argc, char* argv[])
 {
     // minimum required is 2 arguments
@@ -25,14 +39,39 @@ int main(int argc, char* argv[])
     // read the file one line at a time and print it with the row number
     std::string line;
     int rowNumber = 0;
+    int expectedColumns = 0;
+    int problemCount = 0;
+
     while (std::getline(file, line))
     {
         ++rowNumber;
+
+        // row 1 is the header deciding how many columns every row must have
+        if (rowNumber == 1)
+        {
+            expectedColumns = CountColumns(line);
+            continue;
+        }
+
+        int columns = CountColumns(line);
+        if (columns != expectedColumns)
+        {
+            std::cout << "Row " << rowNumber << ": expected " << expectedColumns
+                      << " columns but found " << columns << "\n";
+            ++problemCount;
+        }
         std::cout << "Row " << rowNumber << ": " << line << "\n";
     }
 
-    std::cout << rowNumber << " rows read\n";
-    return 0;
+    if (rowNumber == 0)
+    {
+        std::cout << "Error: the file is empty\n";
+        return 1;
+    }
+
+    int dataRows = rowNumber - 1;
+    std::cout << problemCount << " problems found in " << dataRows << " rows\n";
+    return (problemCount == 0) ? 0 : 1;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
