@@ -1,22 +1,42 @@
 // csvcheck.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
-// Counts how many columns a CSV line has (number of commas + 1)
-int CountColumns(const std::string& line)
+// Splits one CSV line into its separate values (split at each comma)
+std::vector<std::string> SplitLine(const std::string& line)
 {
-    int columns = 1;
+    std::vector<std::string> fields;
+    std::string current;
     for (char c : line)
     {
         if (c == ',')
         {
-            ++columns;
+            fields.push_back(current);
+            current.clear();
+        }
+        else
+        {
+            current += c;
         }
     }
-    return columns;
+    fields.push_back(current);
+    return fields;
+}
+
+// Removes spaces and tabs from both ends, so "  " counts as empty
+std::string Trim(const std::string& text)
+{
+    size_t start = text.find_first_not_of(" \t\r");
+    if (start == std::string::npos)
+    {
+        return "";
+    }
+    size_t end = text.find_last_not_of(" \t\r");
+    return text.substr(start, end - start + 1);
 }
 
 int main(int argc, char* argv[])
@@ -39,28 +59,58 @@ int main(int argc, char* argv[])
     // read the file one line at a time and print it with the row number
     std::string line;
     int rowNumber = 0;
-    int expectedColumns = 0;
     int problemCount = 0;
+    std::vector<std::string> headers;
+    std::unordered_map<std::string, int> seenIds; // ID -> row where it first appeared
 
     while (std::getline(file, line))
     {
         ++rowNumber;
+        std::vector<std::string> fields = SplitLine(line);
 
         // row 1 is the header deciding how many columns every row must have
         if (rowNumber == 1)
         {
-            expectedColumns = CountColumns(line);
+            headers = fields;
             continue;
         }
 
-        int columns = CountColumns(line);
-        if (columns != expectedColumns)
+        // Check 1: same number of columns as the header
+        if (fields.size() != headers.size())
         {
-            std::cout << "Row " << rowNumber << ": expected " << expectedColumns
-                      << " columns but found " << columns << "\n";
+            std::cout << "Row " << rowNumber << ": expected " << headers.size()
+                      << " columns but found " << fields.size() << "\n";
             ++problemCount;
+            continue; // the other checks need the right column count
         }
-        std::cout << "Row " << rowNumber << ": " << line << "\n";
+
+        // Check 2: no empty values
+        for (size_t i = 0; i < fields.size(); ++i)
+        {
+            if (Trim(fields[i]).empty())
+            {
+                std::cout << "Row " << rowNumber << ": column '" << Trim(headers[i])
+                          << "' is empty\n";
+                ++problemCount;
+            }
+        }
+
+        // Check 3: the first column (the ID) must be unique
+        std::string id = Trim(fields[0]);
+        if (!id.empty())
+        {
+            auto found = seenIds.find(id);
+            if (found != seenIds.end())
+            {
+                std::cout << "Row " << rowNumber << ": duplicate ID '" << id
+                          << "' (first seen on row " << found->second << ")\n";
+                ++problemCount;
+            }
+            else
+            {
+                seenIds[id] = rowNumber;
+            }
+        }
     }
 
     if (rowNumber == 0)
